@@ -1,0 +1,32 @@
+1.How many types of Acacia plants are in the taxonomy table?
+Ans:
+SELECT COUNT(DISTINCT species) AS acacia_types
+FROM taxonomy
+WHERE genus = 'Acacia';
+
+Connect to the public database:
+cmd: mysql --user rfamro --host mysql-rfam-public.ebi.ac.uk --port 4497 --database Rfam
+
+The returned value (acacia_types) is the final numeric answer.
+---------------------------------------------------------------------------------------------------------------------------------
+2.Which type of wheat has the longest DNA sequence? (hint: use the rfamseq and the taxonomy tables)
+Ans:
+SELECT t.species,MAX(r.length) AS longest_dna_sequence FROM taxonomy t
+JOIN rfamseq r ON t.ncbi_id = r.ncbi_id
+WHERE t.genus = 'Triticum'
+GROUP BY t.species
+ORDER BY longest_dna_sequence DESC
+LIMIT 1;
+The wheat type with the longest DNA sequence is the Triticum species that has the maximum sequence length in the rfamseq table, as determined by the query above.
+------------------------------------------------------------------------------------------------------------------------------------
+3.We want to paginate a list of the family names and their longest DNA sequence lengths (in descending order of length) where only families that have DNA sequence lengths greater than 1,000,000 are included. Give a query that will return the 9th page when there are 15 results per page. (hint: we need the family accession ID, family name and the maximum length in the results)
+Ans:
+SELECT f.rfam_acc,f.rfam_id,MAX(r.length) AS max_len
+FROM family f
+JOIN full_region fr ON fr.rfam_acc = f.rfam_acc
+JOIN rfamseq r ON r.rfamseq_acc = fr.rfamseq_acc
+GROUP BY f.rfam_acc, f.rfam_id
+HAVING MAX(r.length) > 1000000
+ORDER BY max_len DESC
+LIMIT 15 OFFSET 120;
+The 9th page of families (15 per page) whose longest DNA sequence exceeds 1,000,000 bp can be retrieved using the SQL query shown above, which joins the family, full_region, and rfamseq tables and orders results by maximum sequence length in descending order.
